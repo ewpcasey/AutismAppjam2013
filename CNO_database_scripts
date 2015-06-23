@@ -1,0 +1,465 @@
+Generated from the mySQL database.  Use it for offline reference or backup restores. -- Wayne
+
+delimiter $$
+
+CREATE TABLE `AAJ13_Users` (
+  `UserID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserName` varchar(200) NOT NULL DEFAULT '',
+  `UserPwd` varchar(20) NOT NULL,
+  `UserEmail` varchar(200) DEFAULT '',
+  `ParentID` int(11) DEFAULT '0',
+  `SessionStatus` int(11) NOT NULL,
+  `CreateDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`UserID`),
+  UNIQUE KEY `idAJ13_Users_UNIQUE` (`UserID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='SessionStatus: 0 for none, 1 for active (more 
+
+statuses can be assigned)\nParentID: when 0 means user is Parent, otherwise user is Child'$$
+
+CREATE
+DEFINER=`sandboxe_app`@`174.67.%.%`
+TRIGGER `sandboxe_app`.`AAJ13_Users_BINS`
+BEFORE INSERT ON `sandboxe_app`.`AAJ13_Users`
+FOR EACH ROW
+-- Edit trigger body code below this line. Do not edit lines above this one
+
+SET NEW.CreateDate=NOW()
+$$
+
+
+
+delimiter $$
+
+CREATE TABLE `AAJ13_SessionComponents` (
+  `SCID` int(11) NOT NULL AUTO_INCREMENT,
+  `SessionID` int(11) NOT NULL,
+  `SCVisual` int(11) DEFAULT NULL,
+  `SCAudio` int(11) DEFAULT NULL,
+  `CreateDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`SCID`),
+  UNIQUE KEY `SCID_UNIQUE` (`SCID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1$$
+
+CREATE
+DEFINER=`sandboxe_app`@`174.67.%.%`
+TRIGGER `sandboxe_app`.`AAJ13_SessionComponents_BINS`
+BEFORE INSERT ON `sandboxe_app`.`AAJ13_SessionComponents`
+FOR EACH ROW
+-- Edit trigger body code below this line. Do not edit lines above this one
+
+SET NEW.CreateDate=NOW()
+$$
+
+
+delimiter $$
+
+CREATE TABLE `AAJ13_SessionHistory` (
+  `SessionID` int(11) NOT NULL AUTO_INCREMENT,
+  `ParentID` int(11) DEFAULT NULL,
+  `ChildID` int(11) DEFAULT NULL,
+  `Score` int(11) NOT NULL DEFAULT '0',
+  `CreateDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`SessionID`),
+  UNIQUE KEY `SessionID_UNIQUE` (`SessionID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1$$
+
+CREATE
+DEFINER=`sandboxe_app`@`174.67.%.%`
+TRIGGER `sandboxe_app`.`AAJ13_SessionHistory_BINS`
+BEFORE INSERT ON `sandboxe_app`.`AAJ13_SessionHistory`
+FOR EACH ROW
+-- Edit trigger body code below this line. Do not edit lines above this one
+
+SET NEW.CreateDate=NOW()
+$$
+
+
+delimiter $$
+
+CREATE TABLE `AAJ13_UserAudio` (
+  `AudioID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserID` int(11) DEFAULT NULL,
+  `AudioName` varchar(200) DEFAULT NULL,
+  `AudioLoc` varchar(200) DEFAULT NULL,
+  `CreateDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`AudioID`),
+  UNIQUE KEY `AudioID_UNIQUE` (`AudioID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1$$
+
+CREATE
+DEFINER=`sandboxe_app`@`174.67.%.%`
+TRIGGER `sandboxe_app`.`AAJ13_UserAudio_BINS`
+BEFORE INSERT ON `sandboxe_app`.`AAJ13_UserAudio`
+FOR EACH ROW
+-- Edit trigger body code below this line. Do not edit lines above this one
+SET NEW.CreateDate=NOW()
+$$
+
+
+delimiter $$
+
+CREATE TABLE `AAJ13_UserPictures` (
+  `PicID` int(11) NOT NULL AUTO_INCREMENT,
+  `UserID` int(11) NOT NULL,
+  `PicName` varchar(200) DEFAULT '',
+  `PicLoc` varchar(200) DEFAULT '',
+  `CreateDate` datetime DEFAULT NULL,
+  PRIMARY KEY (`PicID`),
+  UNIQUE KEY `PicID_UNIQUE` (`PicID`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Pictures uploaded by the parent to be shown to child.'$$
+
+CREATE
+DEFINER=`sandboxe_app`@`174.67.%.%`
+TRIGGER `sandboxe_app`.`AAJ13_UserPictures_BINS`
+BEFORE INSERT ON `sandboxe_app`.`AAJ13_UserPictures`
+FOR EACH ROW
+-- Edit trigger body code below this line. Do not edit lines above this one
+SET NEW.CreateDate=NOW()
+$$
+
+/*run first and in order so the autoincrement IDs them as 1-10. */
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'red');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'blue');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'green');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'yellow');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'purple');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'orange');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'white');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'black');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'brown');
+INSERT INTO `sandboxe_app`.`AAJ13_UserPictures` (`UserID`, `PicName`) VALUES ('0', 'pink');
+
+
+
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_ActivateSession`;
+
+DELIMITER $$
+USE `sandboxe_app`$$
+CREATE DEFINER=`sandboxe_app`@`174.67.%.%` PROCEDURE `spAAJ13_ActivateSession`(IN prmUserID int)
+BEGIN
+UPDATE sandboxe_app.AAJ13_Users
+set SessionStatus = 1
+where UserID = prmUserID;
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_DeactivateSession`;
+
+DELIMITER $$
+USE `sandboxe_app`$$
+CREATE DEFINER=`sandboxe_app`@`174.67.%.%` PROCEDURE `spAAJ13_DeactivateSession`(IN prmUserID int)
+BEGIN
+UPDATE sandboxe_app.AAJ13_Users
+set SessionStatus = 0
+where UserID = prmUserID;
+END$$
+
+DELIMITER ;
+
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_AddUser`;
+
+DELIMITER $$
+USE `sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_AddUser` 
+(
+IN prmUserName varchar(30),
+IN prmUserPwd 
+
+varchar(20),
+IN prmFirstName varchar(200),
+IN prmLastName varchar(200),
+IN prmUserEmail varchar
+
+(200),
+IN prmParentID int
+)
+BEGIN
+
+INSERT INTO `sandboxe_app`.`AAJ13_Users`
+(
+`UserName`,
+`UserPwd`,
+`FirstName`,
+`LastName`,
+`UserEmail`,
+`ParentID`
+)
+VALUES
+(
+prmUserName,
+prmUserPwd,
+prmFirstName,
+prmLastName,
+prmUserEmail,
+prmParentID
+);
+
+END$$
+
+DELIMITER ;
+
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_UpdateUser`;
+
+DELIMITER $$
+USE `sandboxe_app`
+
+$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_UpdateUser`
+(
+IN prmUserID int,
+IN prmUserPwd varchar
+
+(20),
+IN prmFirstName varchar(200),
+IN prmLastName varchar(200),
+IN prmUserEmail varchar(200),
+IN 
+
+prmParentID int
+)
+BEGIN
+
+UPDATE `sandboxe_app`.`AAJ13_Users`
+SET
+`UserPwd` = prmUserPwd,
+`FirstName` = 
+
+prmFirstName,
+`LastName` = prmLastName,
+`UserEmail` = prmUserEmail,
+`ParentID` = prmParentID
+WHERE 
+
+UserID = prmUserID;
+
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_DeactivateUser`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_DeactivateUser` ( IN prmUserID int )
+BEGIN
+
+UPDATE `sandboxe_app`.`AAJ13_Users`
+SET
+AccountStatus = 0
+WHERE UserID = prmUserID;
+
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_ReactivateUser`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_ReactivateUser` ( IN prmUserID int )
+BEGIN
+
+UPDATE `sandboxe_app`.`AAJ13_Users`
+SET
+AccountStatus = 1
+WHERE UserID = prmUserID;
+
+END$$
+
+
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_AddUserPicture`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_AddUserPicture`
+(
+IN prmUserID int,
+IN 
+
+prmPicName varchar(200),
+IN prmPicLoc varchar(200)
+)
+BEGIN
+
+INSERT INTO 
+
+`sandboxe_app`.`AAJ13_UserPictures`
+(
+`UserID`,
+`PicName`,
+`PicLoc`
+)
+VALUES
+(
+prmUserID,
+prmPicName,
+prmPicLoc
+);
+
+END$$
+
+DELIMITER ;
+
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_DeleteUserPicture`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_DeleteUserPicture` ( IN prmPicID int )
+BEGIN
+
+DELETE FROM `sandboxe_app`.`AAJ13_UserPictures`
+WHERE PicID = prmPicID;
+
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_AddUserAudio`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_AddUserAudio`
+(
+IN prmUserID int,
+IN 
+
+prmAudioName varchar(200),
+IN prmAudioLoc varchar(200)
+)
+BEGIN
+
+INSERT INTO 
+
+`sandboxe_app`.`AAJ13_UserAudio`
+(
+`UserID`,
+`AudioName`,
+`AudioLoc`
+)
+VALUES
+(
+prmUserID,
+prmAudioName,
+prmAudioLoc
+);
+
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_DeleteUserAudio`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_DeleteUserAudio` ( IN prmAudioID int )
+BEGIN
+
+DELETE FROM `sandboxe_app`.`AAJ13_UserAudio`
+WHERE AudioID = prmAudioID;
+
+END$$
+
+DELIMITER ;
+
+
+
+/* These Get queries are specifically coded to allow a double function. Normally each sp gets 
+
+records by passed ID, but if pass in -1, the sp will convert the value to null and use Coalesce 
+
+command to change query to grab all records in table. */
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_GetUser`;
+
+DELIMITER $$
+USE `sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_GetUser` (IN prmUserID int)
+BEGIN
+
+-- enter -1 to signal a 
+
+blanket query of all users in table
+set prmUserID = case prmUserID when -1 then null else 
+
+prmUserID end;
+
+select * from AAJ13_Users where UserID = COALESCE(prmUserID, UserID);
+
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_GetUserPicture`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_GetUserPicture` ( IN prmPicID int )
+BEGIN
+
+-- enter -1 to signal a blanket query of all entries in table
+set prmPicID = case prmPicID 
+
+when -1 then null else prmPicID end;
+
+select * from AAJ13_UserPictures where PicID = COALESCE
+
+(prmPicID, PicID);
+
+END$$
+
+DELIMITER ;
+
+USE `sandboxe_app`;
+DROP procedure IF EXISTS `spAAJ13_GetUserAudio`;
+
+DELIMITER $$
+USE 
+
+`sandboxe_app`$$
+CREATE PROCEDURE `sandboxe_app`.`spAAJ13_GetUserAudio` ( IN prmAudioID int )
+BEGIN
+
+-- enter -1 to signal a blanket query of all entries in table
+set prmAudioID = case 
+
+prmAudioID when -1 then null else prmAudioID end;
+
+select * from AAJ13_UserAudio where AudioID = 
+
+COALESCE(prmAudioID, AudioID);
+
+END$$
+
+DELIMITER ;
